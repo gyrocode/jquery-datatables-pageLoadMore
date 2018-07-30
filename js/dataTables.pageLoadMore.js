@@ -1,10 +1,10 @@
-/*! dataTables.pageLoadMore.js 1.0.0
+/*! dataTables.pageLoadMore.js 1.0.1
  *  Copyright (c) Gyrocode LLC (www.gyrocode.com)
  *  License: MIT License
  */
 /**
  * @summary     Allows to load more content with "Load More" button
- * @version     1.0.0
+ * @version     1.0.1
  * @file        dataTables.pageLoadMore.js
  * @author      [Gyrocode LLC](http://www.gyrocode.com/articles/jquery-datatables-pagination-with-load-more-button/)
  * @contact     https://www.gyrocode.com/contacts/
@@ -30,7 +30,7 @@ $.fn.dataTable.pageLoadMore = function(opts){
    var cacheLastJson = null;
 
    return function (request, drawCallback, settings){
-      if(!settings.pageLoadMore){
+      if(!settings.hasOwnProperty('pageLoadMore')){
          var api = new $.fn.dataTable.Api(settings);
          var info = api.page.info();
 
@@ -100,7 +100,10 @@ $.fn.dataTable.pageLoadMore = function(opts){
 //
 $.fn.dataTable.Api.register('page.resetMore()', function(){
    return this.iterator('table', function (settings){
-      api.page.len(settings.pageLoadMore.pageLength);
+      var api = this;
+      if(settings.hasOwnProperty('pageLoadMore')){
+         api.page.len(settings.pageLoadMore.pageLength);
+      }
    });
 });
 
@@ -124,7 +127,7 @@ $.fn.dataTable.Api.register('page.loadMore()', function(){
       var info = api.page.info();
 
       if(info.pages > 1){
-         if(!settings.pageLoadMore){
+         if(!settings.hasOwnProperty('pageLoadMore')){
             settings.pageLoadMore = { pageLength: info.length };
          }
 
