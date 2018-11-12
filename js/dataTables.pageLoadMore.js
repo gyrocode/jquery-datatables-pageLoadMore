@@ -28,10 +28,11 @@ $.fn.dataTable.pageLoadMore = function(opts){
 
    var cacheLastRequest = null;
    var cacheLastJson = null;
+   var api = this;
 
    return function (request, drawCallback, settings){
       if(!settings.hasOwnProperty('pageLoadMore')){
-         var api = new $.fn.dataTable.Api(settings);
+         api = new $.fn.dataTable.Api(settings);
          var info = api.page.info();
 
          settings.pageLoadMore = { pageLength: info.length };
@@ -42,9 +43,13 @@ $.fn.dataTable.pageLoadMore = function(opts){
       if(cacheLastRequest){
          if( JSON.stringify(request.order)   !== JSON.stringify(cacheLastRequest.order) ||
              JSON.stringify(request.columns) !== JSON.stringify(cacheLastRequest.columns) ||
-             JSON.stringify(request.search)  !== JSON.stringify(cacheLastRequest.search)
+             JSON.stringify(request.search)  !== JSON.stringify(cacheLastRequest.search) ||
+             request.length === settings.pageLoadMore.pageLength
          ){
             pageResetMore = true;
+            if (api.page.len() != settings.pageLoadMore.pageLength) {
+                api.page.len(settings.pageLoadMore.pageLength);
+            }
          }
       }
 
