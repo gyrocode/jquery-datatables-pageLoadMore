@@ -42,7 +42,8 @@ $.fn.dataTable.pageLoadMore = function(opts){
       if(cacheLastRequest){
          if( JSON.stringify(request.order)   !== JSON.stringify(cacheLastRequest.order) ||
              JSON.stringify(request.columns) !== JSON.stringify(cacheLastRequest.columns) ||
-             JSON.stringify(request.search)  !== JSON.stringify(cacheLastRequest.search)
+             JSON.stringify(request.search)  !== JSON.stringify(cacheLastRequest.search) ||
+             request.length === settings.pageLoadMore.pageLength
          ){
             pageResetMore = true;
          }
