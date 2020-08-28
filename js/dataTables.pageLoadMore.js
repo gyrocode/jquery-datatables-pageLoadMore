@@ -1,10 +1,10 @@
-/*! dataTables.pageLoadMore.js 1.0.1
+/*! dataTables.pageLoadMore.js 1.0.2
  *  Copyright (c) Gyrocode LLC (www.gyrocode.com)
  *  License: MIT License
  */
 /**
  * @summary     Allows to load more content with "Load More" button
- * @version     1.0.1
+ * @version     1.0.2
  * @file        dataTables.pageLoadMore.js
  * @author      [Gyrocode LLC](http://www.gyrocode.com/articles/jquery-datatables-pagination-with-load-more-button/)
  * @contact     https://www.gyrocode.com/contacts/
@@ -26,34 +26,34 @@ $.fn.dataTable.pageLoadMore = function(opts){
        method: 'GET' // Ajax HTTP method
    }, opts);
 
-   var cacheLastRequest = null;
-   var cacheLastJson = null;
-
    return function (request, drawCallback, settings){
       if(!settings.hasOwnProperty('pageLoadMore')){
          var api = new $.fn.dataTable.Api(settings);
          var info = api.page.info();
 
-         settings.pageLoadMore = { pageLength: info.length };
+         settings.pageLoadMore = { 
+            pageLength: info.length,
+            cacheLastRequest: null,
+            cacheLastJson: null
+         };
       }
 
       var pageResetMore = false;
 
-      if(cacheLastRequest){
-         if( JSON.stringify(request.order)   !== JSON.stringify(cacheLastRequest.order) ||
-             JSON.stringify(request.columns) !== JSON.stringify(cacheLastRequest.columns) ||
-             JSON.stringify(request.search)  !== JSON.stringify(cacheLastRequest.search)
+      if(settings.pageLoadMore.cacheLastRequest){
+         if( JSON.stringify(request.order)   !== JSON.stringify(settings.pageLoadMore.cacheLastRequest.order) ||
+             JSON.stringify(request.columns) !== JSON.stringify(settings.pageLoadMore.cacheLastRequest.columns) ||
+             JSON.stringify(request.search)  !== JSON.stringify(settings.pageLoadMore.cacheLastRequest.search)
          ){
             pageResetMore = true;
          }
       }
 
-
       // Store the request for checking next time around
-      cacheLastRequest = $.extend(true, {}, request);
+      settings.pageLoadMore.cacheLastRequest = $.extend(true, {}, request);
 
       if(pageResetMore){
-         cacheLastJson = null;
+         settings.pageLoadMore.cacheLastJson = null;
          request.length = settings.pageLoadMore.pageLength;
       }
 
@@ -75,18 +75,24 @@ $.fn.dataTable.pageLoadMore = function(opts){
          $.extend(request, conf.data);
       }
 
-      settings.jqXHR = $.ajax({
+      // Cancel an existing request
+      var xhr = settings.pageLoadMore.jqXHR;
+      if(xhr && xhr.readyState !== 4){
+         xhr.abort();
+      }
+
+      settings.pageLoadMore.jqXHR = $.ajax({
          "type":     conf.method,
          "url":      conf.url,
          "data":     request,
          "dataType": "json",
          "cache":    false,
          "success":  function(json){
-            if(cacheLastJson){
-               json.data = cacheLastJson.data.concat(json.data);
+            if(settings.pageLoadMore.cacheLastJson){
+               json.data = settings.pageLoadMore.cacheLastJson.data.concat(json.data);
             }
 
-            cacheLastJson = $.extend(true, {}, json);
+            settings.pageLoadMore.cacheLastJson = $.extend(true, {}, json);
 
             drawCallback(json);
          }
