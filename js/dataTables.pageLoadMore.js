@@ -82,12 +82,12 @@ $.fn.dataTable.pageLoadMore = function(opts){
       }
 
       settings.pageLoadMore.jqXHR = $.ajax({
-         "type":     conf.method,
-         "url":      conf.url,
-         "data":     request,
-         "dataType": "json",
-         "cache":    false,
-         "success":  function(json){
+         'type': conf.method,
+         'url': conf.url,
+         'data': request,
+         'dataType': 'json',
+         'cache': false,
+         'success': function(json){
             if(settings.pageLoadMore.cacheLastJson){
                json.data = settings.pageLoadMore.cacheLastJson.data.concat(json.data);
             }
